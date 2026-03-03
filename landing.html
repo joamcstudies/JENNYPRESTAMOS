@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Préstamos Personales</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --black:#0a0a0a;
+    --white:#f5f5f3;
+    --gray:#888;
+    --gray-light:#1a1a1a;
+    --accent:#25D366;
+  }
+  html{scroll-behavior:smooth;font-size:16px}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'DM Sans',sans-serif;
+    overflow-x:hidden;
+    line-height:1.6;
+  }
+
+  /* --- NOISE TEXTURE OVERLAY --- */
+  body::before{
+    content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:9999;opacity:.3;
+  }
+
+  /* --- NAVIGATION --- */
+  nav{
+    position:fixed;top:0;left:0;width:100%;z-index:100;
+    padding:1.5rem 3rem;
+    display:flex;justify-content:space-between;align-items:center;
+    background:rgba(10,10,10,0.8);backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    transition:all .4s ease;
+  }
+  .nav-logo{
+    font-family:'Playfair Display',serif;
+    font-size:1.3rem;font-weight:600;letter-spacing:2px;
+    text-transform:uppercase;color:var(--white);
+  }
+  .nav-cta{
+    padding:.6rem 1.8rem;border:1px solid rgba(255,255,255,.2);
+    color:var(--white);text-decoration:none;font-size:.8rem;
+    letter-spacing:2px;text-transform:uppercase;
+    transition:all .3s ease;font-weight:500;
+  }
+  .nav-cta:hover{background:var(--white);color:var(--black)}
+
+  /* --- HERO --- */
+  .hero{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:8rem 2rem 4rem;position:relative;
+  }
+  .hero::after{
+    content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:1px;height:120px;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.15));
+  }
+  .hero-content{max-width:800px}
+  .hero-tag{
+    font-size:.75rem;letter-spacing:4px;text-transform:uppercase;
+    color:var(--gray);margin-bottom:2rem;
+    animation:fadeUp .8s ease forwards;opacity:0;
+  }
+  .hero h1{
+    font-family:'Playfair Display',serif;
+    font-size:clamp(2.8rem,7vw,5.5rem);
+    font-weight:700;line-height:1.05;margin-bottom:1.5rem;
+    animation:fadeUp .8s ease .2s forwards;opacity:0;
+  }
+  .hero h1 em{font-style:italic;color:var(--white);opacity:.6}
+  .hero p{
+    font-size:1.1rem;color:var(--gray);max-width:500px;margin:0 auto 3rem;
+    font-weight:300;
+    animation:fadeUp .8s ease .4s forwards;opacity:0;
+  }
+  .hero-cta{
+    display:inline-flex;align-items:center;gap:.8rem;
+    background:var(--white);color:var(--black);
+    padding:1.1rem 3rem;text-decoration:none;
+    font-size:.85rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+    transition:all .4s cubic-bezier(.16,1,.3,1);
+    animation:fadeUp .8s ease .6s forwards;opacity:0;
+  }
+  .hero-cta svg{width:20px;height:20px;transition:transform .3s ease}
+  .hero-cta:hover{transform:scale(1.03);box-shadow:0 20px 60px rgba(255,255,255,.08)}
+  .hero-cta:hover svg{transform:translateX(3px)}
+
+  /* --- DIVIDER --- */
+  .divider{
+    width:60px;height:1px;background:rgba(255,255,255,.12);
+    margin:0 auto;
+  }
+
+  /* --- FEATURES --- */
+  .features{padding:6rem 2rem;max-width:1100px;margin:0 auto}
+  .features-title{
+    text-align:center;font-family:'Playfair Display',serif;
+    font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:1rem;font-weight:600;
+  }
+  .features-sub{
+    text-align:center;color:var(--gray);font-size:.95rem;
+    margin-bottom:4rem;font-weight:300;
+  }
+  .features-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:1.5rem;
+  }
+  .feature-card{
+    border:1px solid rgba(255,255,255,.06);
+    padding:2.5rem 2rem;
+    background:rgba(255,255,255,.02);
+    transition:all .4s ease;position:relative;overflow:hidden;
+  }
+  .feature-card::before{
+    content:'';position:absolute;top:0;left:0;width:100%;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+    transform:scaleX(0);transition:transform .5s ease;
+  }
+  .feature-card:hover::before{transform:scaleX(1)}
+  .feature-card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-4px)}
+  .feature-icon{
+    font-size:1.8rem;margin-bottom:1.2rem;display:block;
+  }
+  .feature-card h3{
+    font-family:'Playfair Display',serif;
+    font-size:1.15rem;margin-bottom:.7rem;font-weight:600;
+  }
+  .feature-card p{color:var(--gray);font-size:.9rem;font-weight:300;line-height:1.7}
+
+  /* --- STEPS --- */
+  .steps{padding:6rem 2rem;max-width:800px;margin:0 auto}
+  .steps-title{
+    text-align:center;font-family:'Playfair Display',serif;
+    font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:4rem;font-weight:600;
+  }
+  .step{
+    display:flex;gap:2rem;align-items:flex-start;margin-bottom:3rem;
+    opacity:0;animation:fadeUp .6s ease forwards;
+  }
+  .step:nth-child(2){animation-delay:.15s}
+  .step:nth-child(3){animation-delay:.3s}
+  .step-number{
+    font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;
+    color:rgba(255,255,255,.08);line-height:1;min-width:60px;
+  }
+  .step-content h3{
+    font-size:1rem;font-weight:600;margin-bottom:.4rem;letter-spacing:.5px;
+  }
+  .step-content p{color:var(--gray);font-size:.9rem;font-weight:300}
+
+  /* --- CTA FINAL --- */
+  .cta-section{
+    padding:8rem 2rem;text-align:center;position:relative;
+  }
+  .cta-section::before{
+    content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:400px;height:400px;
+    background:radial-gradient(circle,rgba(37,211,102,.04),transparent 70%);
+    pointer-events:none;
+  }
+  .cta-section h2{
+    font-family:'Playfair Display',serif;
+    font-size:clamp(2rem,5vw,3.5rem);margin-bottom:1rem;font-weight:700;
+  }
+  .cta-section p{
+    color:var(--gray);font-size:1rem;margin-bottom:3rem;font-weight:300;
+  }
+  .whatsapp-btn{
+    display:inline-flex;align-items:center;gap:1rem;
+    background:var(--accent);color:#fff;
+    padding:1.2rem 3.5rem;text-decoration:none;
+    font-size:.9rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+    transition:all .4s cubic-bezier(.16,1,.3,1);
+    box-shadow:0 0 0 0 rgba(37,211,102,.3);
+  }
+  .whatsapp-btn svg{width:22px;height:22px}
+  .whatsapp-btn:hover{
+    transform:scale(1.04);
+    box-shadow:0 20px 60px rgba(37,211,102,.15);
+  }
+
+  /* Floating WhatsApp button */
+  .floating-wa{
+    position:fixed;bottom:2rem;right:2rem;z-index:100;
+    width:60px;height:60px;border-radius:50%;
+    background:var(--accent);display:flex;align-items:center;justify-content:center;
+    text-decoration:none;
+    box-shadow:0 4px 20px rgba(37,211,102,.3);
+    transition:all .3s ease;
+    animation:pulse 2s infinite;
+  }
+  .floating-wa svg{width:30px;height:30px;fill:#fff}
+  .floating-wa:hover{transform:scale(1.1);box-shadow:0 6px 30px rgba(37,211,102,.45)}
+
+  /* --- FOOTER --- */
+  footer{
+    padding:3rem 2rem;text-align:center;
+    border-top:1px solid rgba(255,255,255,.05);
+  }
+  footer p{color:var(--gray);font-size:.75rem;letter-spacing:1px;font-weight:300}
+
+  /* --- ANIMATIONS --- */
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(30px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 4px 20px rgba(37,211,102,.3)}
+    50%{box-shadow:0 4px 30px rgba(37,211,102,.5)}
+  }
+
+  /* --- SCROLL ANIMATIONS --- */
+  .reveal{opacity:0;transform:translateY(40px);transition:all .7s cubic-bezier(.16,1,.3,1)}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  /* --- RESPONSIVE --- */
+  @media(max-width:768px){
+    nav{padding:1rem 1.5rem}
+    .nav-logo{font-size:1rem}
+    .hero{padding:7rem 1.5rem 3rem}
+    .features{padding:4rem 1.5rem}
+    .steps{padding:4rem 1.5rem}
+    .step{gap:1.2rem}
+    .step-number{font-size:2.2rem;min-width:40px}
+    .cta-section{padding:5rem 1.5rem}
+    .floating-wa{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
+    .floating-wa svg{width:26px;height:26px}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <div class="nav-logo">Préstamos</div>
+  <a href="https://wa.me/50497281506?text=Hola%2C%20me%20interesa%20solicitar%20un%20pr%C3%A9stamo" class="nav-cta">Contactar</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <p class="hero-tag">Soluciones financieras a tu alcance</p>
+    <h1>Tu próximo paso<br>empieza <em>hoy</em></h1>
+    <p>Préstamos personales con atención directa, rápida y sin complicaciones. Escríbenos y recibe una respuesta inmediata.</p>
+    <a href="https://wa.me/50497281506?text=Hola%2C%20me%20interesa%20solicitar%20un%20pr%C3%A9stamo" class="hero-cta">
+      Solicitar ahora
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section class="features reveal">
+  <h2 class="features-title">¿Por qué elegirnos?</h2>
+  <p class="features-sub">Confianza, rapidez y trato personalizado</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">⚡</span>
+      <h3>Respuesta Inmediata</h3>
+      <p>Recibe una respuesta en minutos a través de WhatsApp. Sin esperas, sin burocracia innecesaria.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🤝</span>
+      <h3>Trato Personal</h3>
+      <p>Cada cliente es único. Evaluamos tu situación de forma individual para ofrecerte la mejor solución.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔒</span>
+      <h3>Total Confidencialidad</h3>
+      <p>Tu información es privada y segura. Manejamos cada solicitud con absoluta discreción.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STEPS -->
+<section class="steps reveal">
+  <h2 class="steps-title">¿Cómo funciona?</h2>
+  <div class="step">
+    <div class="step-number">01</div>
+    <div class="step-content">
+      <h3>Escríbenos por WhatsApp</h3>
+      <p>Toca el botón y envíanos un mensaje directo. Cuéntanos qué necesitas.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-number">02</div>
+    <div class="step-content">
+      <h3>Recibe una evaluación</h3>
+      <p>Analizamos tu solicitud y te damos una respuesta clara en el menor tiempo posible.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-number">03</div>
+    <div class="step-content">
+      <h3>Obtén tu préstamo</h3>
+      <p>Si todo está en orden, recibes tu dinero de forma rápida y directa.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA FINAL -->
+<section class="cta-section reveal">
+  <h2>¿Listo para comenzar?</h2>
+  <p>Un mensaje es todo lo que necesitas</p>
+  <a href="https://wa.me/50497281506?text=Hola%2C%20me%20interesa%20solicitar%20un%20pr%C3%A9stamo" class="whatsapp-btn">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Escribir por WhatsApp
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2026 — Todos los derechos reservados</p>
+</footer>
+
+<!-- FLOATING WHATSAPP -->
+<a href="https://wa.me/50497281506?text=Hola%2C%20me%20interesa%20solicitar%20un%20pr%C3%A9stamo" class="floating-wa" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<!-- SCROLL REVEAL -->
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
